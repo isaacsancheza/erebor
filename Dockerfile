@@ -25,3 +25,5 @@ USER $USERNAME
 
 # Use working directory
 WORKDIR $WORKING_DIR
+
+CMD ["python"]
