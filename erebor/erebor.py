@@ -1,20 +1,15 @@
+import os
 import re
-import json
 import requests
 
 
 class Erebor:
-    def __init__(self, filename, site_id='MLM'):
+    def __init__(self, site_id='MLM', access_token_environment_variable='EREBOR_ACCESS_TOKEN'):
         self._site_id = site_id
         self._api_root = 'https://api.mercadolibre.com'
-        self._filename = filename
-        self._response = None
-        self._access_token = None
+        self._access_token = os.environ.get(access_token_environment_variable)
 
-        self._refresh_token()
-
-    def _request(self, *args, include_token=True, refresh_token=False, **kwargs):
-
+    def _request(self, *args, include_token=True, **kwargs):
         method = 'GET'
         headers = dict()
         resource = self._construct_url(*args)
@@ -41,22 +36,12 @@ class Erebor:
         self._response = response
 
         data = response.json()
-        error = data.get('error', None)
         status_code = response.status_code
-
-        if error == 'invalid_grant' and include_token and not refresh_token:
-            self._refresh_token()
-            self._request(method, *args, refresh_token=True, **kwargs)
 
         return status_code, data
 
     def _construct_url(self, resource, *args):
         return '/'.join((self._api_root, resource,) + tuple(str(arg) for arg in args))
-
-    def _refresh_token(self):
-        with open(self._filename, 'r') as f:
-            credentials = json.loads(f.read())
-            self._access_token = credentials['access_token']
 
     def my(self, *args, **kwargs):
         return self._request('my', *args, **kwargs)
