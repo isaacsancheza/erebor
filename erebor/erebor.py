@@ -9,6 +9,9 @@ class Erebor:
         self._api_root = 'https://api.mercadolibre.com'
         self._access_token = os.environ.get(access_token_environment_variable)
 
+        if not self._access_token:
+            raise ValueError(f'erebor: error: environment variable {access_token_environment_variable} not set')
+
     def _request(self, *args, include_token=True, **kwargs):
         method = 'GET'
         headers = dict()
